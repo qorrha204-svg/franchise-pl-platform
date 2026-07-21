@@ -12,6 +12,8 @@ import {
   PenLine,
   ClipboardCheck,
   Loader2,
+  Menu,
+  X,
 } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { useFranchiseData } from "@/lib/data-context";
@@ -33,6 +35,7 @@ export default function AppShell({ children }) {
   const { stores, loading, error, toast, flashToast, wizardOpen, setWizardOpen, report, closeReport, submitEntries, pendingCount } =
     useFranchiseData();
   const [submitting, setSubmitting] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleWizardSubmit = async (payload) => {
     setSubmitting(true);
@@ -96,38 +99,53 @@ export default function AppShell({ children }) {
 
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", fontFamily: "var(--font-sans-kr)" }}>
-      <div style={{ display: "flex" }}>
-        <div
-          style={{
-            width: 220,
-            minHeight: "100vh",
-            background: COLORS.surface,
-            borderRight: `1px solid ${COLORS.line}`,
-            padding: "22px 14px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 8px", marginBottom: 22 }}>
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 6,
-                background: COLORS.accent,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+      <button
+        className="app-mobile-menu-btn"
+        onClick={() => setMobileNavOpen(true)}
+        aria-label="메뉴 열기"
+        style={{ color: COLORS.ink }}
+      >
+        <Menu size={20} />
+      </button>
+      <div
+        className={`app-mobile-backdrop${mobileNavOpen ? " is-open" : ""}`}
+        onClick={() => setMobileNavOpen(false)}
+      />
+      <div className="app-shell-body">
+        <div className={`app-sidebar${mobileNavOpen ? " is-open" : ""}`}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 8px", marginBottom: 22 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 6,
+                  background: COLORS.accent,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TrendingUp size={15} color="#fff" />
+              </div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: COLORS.ink }}>
+                가족점손익원장
+              </div>
+            </div>
+            <button
+              onClick={() => setMobileNavOpen(false)}
+              className="app-mobile-close-btn"
+              aria-label="메뉴 닫기"
+              style={{ color: COLORS.inkSoft, border: "none", background: "none", cursor: "pointer" }}
             >
-              <TrendingUp size={15} color="#fff" />
-            </div>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: COLORS.ink }}>
-              가족점손익원장
-            </div>
+              <X size={18} />
+            </button>
           </div>
           <button
-            onClick={() => setWizardOpen(true)}
+            onClick={() => {
+              setWizardOpen(true);
+              setMobileNavOpen(false);
+            }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -154,6 +172,7 @@ export default function AppShell({ children }) {
               <Link
                 key={n.href}
                 href={n.href}
+                onClick={() => setMobileNavOpen(false)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -181,7 +200,7 @@ export default function AppShell({ children }) {
             <span>매장 {stores.length}개 · Supabase 연동</span>
           </div>
         </div>
-        <div style={{ flex: 1, padding: "28px 34px", maxWidth: 1180 }}>{children}</div>
+        <div className="app-main">{children}</div>
       </div>
       {wizardOpen && (
         <EntryWizard stores={stores} onClose={() => setWizardOpen(false)} onSubmit={handleWizardSubmit} submitting={submitting} />

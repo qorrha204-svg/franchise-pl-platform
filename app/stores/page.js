@@ -76,9 +76,9 @@ export default function StoresPage() {
           ))}
         </select>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: selected ? "1.3fr 1fr" : "1fr", gap: 14 }}>
-        <Card style={{ padding: 0, overflow: "hidden", maxHeight: 640, overflowY: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <div className={selected ? "grid-split-double" : ""} style={selected ? undefined : { display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
+        <Card style={{ padding: 0, maxHeight: 640, overflowY: "auto", overflowX: "auto" }}>
+          <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: COLORS.bg, borderBottom: `1px solid ${COLORS.line}`, position: "sticky", top: 0 }}>
                 {["매장", "타입", "매출", "영업이익", "이익률", "상태", ""].map((h, i) => (
@@ -109,10 +109,10 @@ export default function StoresPage() {
                     background: selected?.id === store.id ? COLORS.accentSoft : "transparent",
                   }}
                 >
-                  <td style={{ padding: "10px 12px", fontSize: 13, color: COLORS.ink }}>
+                  <td style={{ padding: "10px 12px", fontSize: 13, color: COLORS.ink, whiteSpace: "nowrap" }}>
                     {store.name} <span style={{ fontSize: 11, color: COLORS.inkSoft }}>({store.code})</span>
                   </td>
-                  <td style={{ padding: "10px 12px", fontSize: 12, color: COLORS.inkSoft }}>{store.store_type}</td>
+                  <td style={{ padding: "10px 12px", fontSize: 12, color: COLORS.inkSoft, whiteSpace: "nowrap" }}>{store.store_type}</td>
                   <td style={{ padding: "10px 12px", textAlign: "right" }}>
                     {pl.revenue > 0 ? <Num value={won(pl.revenue)} /> : <span style={{ color: COLORS.inkSoft, fontSize: 12 }}>미입력</span>}
                   </td>

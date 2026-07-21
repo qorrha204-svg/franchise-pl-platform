@@ -27,7 +27,7 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
         zIndex: 100,
       }}
     >
-      <div style={{ background: COLORS.surface, borderRadius: 14, width: 420, overflow: "hidden" }}>
+      <div style={{ background: COLORS.surface, borderRadius: 14, width: "min(420px, 92vw)", overflow: "hidden" }}>
         <div
           style={{
             padding: "18px 24px",

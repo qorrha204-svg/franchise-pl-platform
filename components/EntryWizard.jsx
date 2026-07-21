@@ -63,7 +63,7 @@ export default function EntryWizard({ stores, onClose, onSubmit, submitting }) {
         style={{
           background: COLORS.surface,
           borderRadius: 14,
-          width: 640,
+          width: "min(640px, 94vw)",
           maxHeight: "88vh",
           display: "flex",
           flexDirection: "column",

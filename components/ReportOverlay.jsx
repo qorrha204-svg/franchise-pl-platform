@@ -25,7 +25,7 @@ export default function ReportOverlay({ store, month, pl, onClose }) {
       }}
     >
       <style>{PRINT_CSS}</style>
-      <div style={{ background: "#fff", width: 720, borderRadius: 10, overflow: "hidden" }}>
+      <div style={{ background: "#fff", width: "min(720px, 94vw)", borderRadius: 10, overflow: "hidden" }}>
         <div
           className="no-print"
           style={{

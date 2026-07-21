@@ -32,3 +32,135 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* ============================== App shell / sidebar ============================== */
+.app-shell-body {
+  display: flex;
+}
+.app-sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: var(--surface, #fff);
+  border-right: 1px solid var(--line, #dbded6);
+  padding: 22px 14px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 34px;
+  max-width: 1180px;
+}
+.app-mobile-menu-btn {
+  display: none;
+}
+.app-mobile-close-btn {
+  display: none;
+}
+.app-mobile-backdrop {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 210;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 0 0 24px rgba(27, 35, 31, 0.15);
+  }
+  .app-sidebar.is-open {
+    transform: translateX(0);
+  }
+  .app-mobile-menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 220;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--line, #dbded6);
+    background: #fff;
+    cursor: pointer;
+  }
+  .app-mobile-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+  .app-mobile-backdrop.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(27, 35, 31, 0.4);
+    z-index: 205;
+  }
+  .app-main {
+    padding: 70px 16px 24px;
+    max-width: 100%;
+  }
+}
+
+/* ============================== Responsive grids ============================== */
+.grid-kpi-4,
+.grid-kpi-3 {
+  display: grid;
+  gap: 14px;
+}
+.grid-kpi-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid-kpi-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 14px;
+}
+.grid-2col-rev {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 14px;
+}
+.grid-split-double {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 860px) {
+  .grid-kpi-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2col,
+  .grid-2col-rev,
+  .grid-split-double {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .grid-kpi-4,
+  .grid-kpi-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================== Scrollable tables ============================== */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-scroll table {
+  min-width: 640px;
+}

@@ -87,8 +87,8 @@ export default function ManagePage() {
           style={{ ...selectStyle, width: 220 }}
         />
       </div>
-      <Card style={{ padding: 0, overflow: "hidden", maxHeight: 640, overflowY: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <Card style={{ padding: 0, maxHeight: 640, overflowY: "auto", overflowX: "auto" }}>
+        <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: COLORS.bg, borderBottom: `1px solid ${COLORS.line}`, position: "sticky", top: 0 }}>
               {["매장", "가맹점코드", "브랜드", "복합점", "타입구분", ""].map((h) => (
@@ -101,9 +101,9 @@ export default function ManagePage() {
           <tbody>
             {rows.map((s) => (
               <tr key={s.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
-                <td style={{ padding: "9px 12px", fontSize: 13, color: COLORS.ink }}>{s.name}</td>
-                <td style={{ padding: "9px 12px", fontSize: 12.5, fontFamily: "var(--font-mono-kr)", color: COLORS.inkSoft }}>{s.code}</td>
-                <td style={{ padding: "9px 12px", fontSize: 12.5, color: COLORS.inkSoft }}>{brandName(s.brand_id)}</td>
+                <td style={{ padding: "9px 12px", fontSize: 13, color: COLORS.ink, whiteSpace: "nowrap" }}>{s.name}</td>
+                <td style={{ padding: "9px 12px", fontSize: 12.5, fontFamily: "var(--font-mono-kr)", color: COLORS.inkSoft, whiteSpace: "nowrap" }}>{s.code}</td>
+                <td style={{ padding: "9px 12px", fontSize: 12.5, color: COLORS.inkSoft, whiteSpace: "nowrap" }}>{brandName(s.brand_id)}</td>
                 <td style={{ padding: "9px 12px" }}>
                   <Badge>{s.complex_type}</Badge>
                 </td>

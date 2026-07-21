@@ -8,7 +8,7 @@ import { computePL } from "@/lib/pl";
 import { brandName } from "@/lib/constants";
 import { storeById } from "@/lib/stores";
 import { useFranchiseData } from "@/lib/data-context";
-import { Card, Num, primaryBtn, secondaryBtn } from "@/components/ui";
+import { Card, Num, Badge, primaryBtn, secondaryBtn } from "@/components/ui";
 
 export default function ApprovalPage() {
   const { stores, financials, decide, flashToast } = useFranchiseData();
@@ -23,11 +23,21 @@ export default function ApprovalPage() {
       if (!map.has(key)) map.set(key, { storeId: f.store_id, month: f.month, writer: f.writer, rows: [] });
       map.get(key).rows.push(f);
     });
-    return Array.from(map.values()).map((b) => ({
-      ...b,
-      pl: computePL(b.storeId, b.month, financials, ["pending"]),
-      store: storeById(stores, b.storeId),
-    }));
+    return Array.from(map.values()).map((b) => {
+      // A store/month that already has confirmed rows alongside these
+      // pending ones means someone edited previously-approved numbers
+      // (editEntries only touches the changed accounts); a batch with no
+      // confirmed sibling rows is a first-time submission from the wizard.
+      const isRevision = financials.some(
+        (f) => f.store_id === b.storeId && f.month === b.month && f.status === "confirmed"
+      );
+      return {
+        ...b,
+        isRevision,
+        pl: computePL(b.storeId, b.month, financials, ["pending"]),
+        store: storeById(stores, b.storeId),
+      };
+    });
   }, [financials, stores]);
 
   const handleDecision = async (storeId, month, decision, approverName) => {
@@ -66,13 +76,16 @@ export default function ApprovalPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <Building2 size={18} color={COLORS.accent} />
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>{b.store?.name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: COLORS.ink }}>{b.store?.name}</span>
+                      <Badge tone={b.isRevision ? "warn" : "good"}>{b.isRevision ? "수정 승인" : "최초 승인"}</Badge>
+                    </div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft }}>
                       {b.month} · {brandName(b.store?.brand_id)} · 작성자 {b.writer || "-"} · {b.rows.length}개 항목
                     </div>
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 11, color: COLORS.inkSoft }}>매출 / 영업이익</div>
                     <div style={{ fontSize: 13 }}>

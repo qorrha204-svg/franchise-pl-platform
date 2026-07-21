@@ -153,7 +153,7 @@ export default function DashboardPage() {
     return (
       <div>
         <DashHeader {...filterProps} refMonth={latestConfirmedMonth} onExport={handleExportAll} />
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 20 }}>
+        <div className="grid-kpi-4" style={{ marginBottom: 20 }}>
           <Card>
             <div style={kpiLabel}>전체 매출</div>
             <div style={{ fontSize: 22 }}>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
             </div>
           </Card>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 14, marginBottom: 14 }}>
+        <div className="grid-2col" style={{ marginBottom: 14 }}>
           <Card>
             <div style={cardTitle}>브랜드별 매출 · 영업이익 (천원)</div>
             <ResponsiveContainer width="100%" height={240}>
@@ -216,6 +216,7 @@ export default function DashboardPage() {
           <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 14 }}>
             {latestConfirmedMonth} 기준 영업이익률이 낮은 매장입니다.
           </p>
+          <div className="table-scroll">
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${COLORS.line}` }}>
@@ -238,8 +239,8 @@ export default function DashboardPage() {
             <tbody>
               {worstStores.map(({ store, pl }) => (
                 <tr key={store.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
-                  <td style={{ padding: "8px 4px", fontSize: 13, color: COLORS.ink }}>{store.name}</td>
-                  <td style={{ padding: "8px 4px", fontSize: 13, color: COLORS.inkSoft }}>{brandName(store.brand_id)}</td>
+                  <td style={{ padding: "8px 4px", fontSize: 13, color: COLORS.ink, whiteSpace: "nowrap" }}>{store.name}</td>
+                  <td style={{ padding: "8px 4px", fontSize: 13, color: COLORS.inkSoft, whiteSpace: "nowrap" }}>{brandName(store.brand_id)}</td>
                   <td style={{ padding: "8px 4px", textAlign: "right" }}>
                     <Num value={won(pl.revenue)} />
                   </td>
@@ -260,6 +261,7 @@ export default function DashboardPage() {
               )}
             </tbody>
           </table>
+          </div>
         </Card>
       </div>
     );
@@ -281,7 +283,7 @@ export default function DashboardPage() {
   return (
     <div>
       <DashHeader {...filterProps} refMonth={latestConfirmedMonth} onExport={handleExportAll} />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 20 }}>
+      <div className="grid-kpi-3" style={{ marginBottom: 20 }}>
         <Card>
           <div style={kpiLabel}>매출 ({latestConfirmedMonth})</div>
           <div style={{ fontSize: 22 }}>
@@ -301,7 +303,7 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 14 }}>
+      <div className="grid-2col-rev">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <Card>
             <div style={cardTitle}>비용 구조 (만원)</div>
