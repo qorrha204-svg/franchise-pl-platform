@@ -237,7 +237,10 @@ export default function DashboardPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "Pretendard" }} />
                 <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
                 <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
-                <Legend wrapperStyle={{ fontSize: 12, fontFamily: "Pretendard" }} />
+                <Legend
+                  wrapperStyle={{ fontSize: 12, fontFamily: "Pretendard" }}
+                  formatter={(value) => <span style={{ color: COLORS.ink }}>{value}</span>}
+                />
                 <Bar dataKey="매출" fill={COLORS.accentSoft} stroke={COLORS.accent} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="영업이익" fill={COLORS.accent} radius={[4, 4, 0, 0]} />
               </BarChart>
