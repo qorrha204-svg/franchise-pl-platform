@@ -22,7 +22,7 @@ const monoKr = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "가맹손익원장",
+  title: "가족점손익원장",
   description: "가맹점 손익계산서 관리 웹앱",
 };
 

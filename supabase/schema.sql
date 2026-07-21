@@ -1,4 +1,4 @@
--- 가맹손익원장 schema (spec section 3)
+-- 가족점손익원장 schema (spec section 3)
 -- Run this once in the Supabase SQL editor (or via `supabase db push`)
 -- against a fresh project, then run seed.sql.
 

@@ -1,4 +1,4 @@
-# 가맹손익원장
+# 가족점손익원장
 
 외식 프랜차이즈 매장별 손익계산서를 수기입력 → 본사 승인 → 대시보드/가맹점 리포트로 관리하는
 웹앱입니다. `franchise-pl-platform-spec.md` 스펙과 `FranchisePLPlatform.jsx` 프로토타입을

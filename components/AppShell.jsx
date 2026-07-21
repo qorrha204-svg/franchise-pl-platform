@@ -123,7 +123,7 @@ export default function AppShell({ children }) {
               <TrendingUp size={15} color="#fff" />
             </div>
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: COLORS.ink }}>
-              가맹손익원장
+              가족점손익원장
             </div>
           </div>
           <button
