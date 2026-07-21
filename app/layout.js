@@ -1,24 +1,17 @@
-import { Space_Grotesk, IBM_Plex_Sans_KR, IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { DataProvider } from "@/lib/data-context";
 import AppShell from "@/components/AppShell";
 
-const display = Space_Grotesk({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-
-const sansKr = IBM_Plex_Sans_KR({
-  variable: "--font-sans-kr",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const monoKr = IBM_Plex_Mono({
-  variable: "--font-mono-kr",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const pretendard = localFont({
+  variable: "--font-pretendard",
+  src: [
+    { path: "../fonts/Pretendard-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/Pretendard-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/Pretendard-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/Pretendard-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  display: "swap",
 });
 
 export const metadata = {
@@ -28,7 +21,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ko" className={`${display.variable} ${sansKr.variable} ${monoKr.variable}`}>
+    <html lang="ko" className={pretendard.variable}>
       <body>
         <DataProvider>
           <AppShell>{children}</AppShell>

@@ -187,10 +187,10 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={brandChart}>
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "IBM Plex Sans KR" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} tickFormatter={numFmt} />
-                <Tooltip contentStyle={{ fontFamily: "IBM Plex Sans KR", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
-                <Legend wrapperStyle={{ fontSize: 12, fontFamily: "IBM Plex Sans KR" }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "Pretendard" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
+                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
+                <Legend wrapperStyle={{ fontSize: 12, fontFamily: "Pretendard" }} />
                 <Bar dataKey="매출" fill={COLORS.accentSoft} stroke={COLORS.accent} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="영업이익" fill={COLORS.accent} radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -201,9 +201,9 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={trendChart}>
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} tickFormatter={numFmt} />
-                <Tooltip contentStyle={{ fontFamily: "IBM Plex Sans KR", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: "Pretendard" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
+                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
                 <Line type="monotone" dataKey="영업이익" stroke={COLORS.accent} strokeWidth={2.5} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -308,9 +308,9 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={catChart}>
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "IBM Plex Sans KR" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} />
-                <Tooltip contentStyle={{ fontFamily: "IBM Plex Sans KR", fontSize: 12, borderRadius: 8 }} />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "Pretendard" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} />
+                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} />
                 <Bar dataKey="금액" fill={COLORS.accent} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -320,9 +320,9 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height={180}>
               <LineChart data={trendChart}>
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "IBM Plex Mono" }} tickFormatter={numFmt} />
-                <Tooltip contentStyle={{ fontFamily: "IBM Plex Sans KR", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fontFamily: "Pretendard" }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
+                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
                 <Line type="monotone" dataKey="영업이익" stroke={COLORS.accent} strokeWidth={2.5} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>

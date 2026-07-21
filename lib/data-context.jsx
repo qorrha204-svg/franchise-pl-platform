@@ -27,6 +27,7 @@ async function fetchAllRows(table, select = "*", orderColumn) {
 export function DataProvider({ children }) {
   const [stores, setStores] = useState([]);
   const [financials, setFinancials] = useState([]);
+  const [editHistory, setEditHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState("");
@@ -53,6 +54,19 @@ export function DataProvider({ children }) {
     return data;
   }, []);
 
+  const refetchEditHistory = useCallback(async () => {
+    // financial_entry_edits is a newer table — best-effort so an
+    // un-migrated database doesn't take down the rest of the app.
+    try {
+      const data = await fetchAllRows("financial_entry_edits", "*");
+      setEditHistory(data);
+      return data;
+    } catch {
+      setEditHistory([]);
+      return [];
+    }
+  }, []);
+
   const refetchAll = useCallback(async () => {
     if (!isSupabaseConfigured) {
       setError(
@@ -64,13 +78,14 @@ export function DataProvider({ children }) {
     setLoading(true);
     try {
       await Promise.all([refetchStores(), refetchFinancials()]);
+      refetchEditHistory();
       setError(null);
     } catch (e) {
       setError(e.message || String(e));
     } finally {
       setLoading(false);
     }
-  }, [refetchStores, refetchFinancials]);
+  }, [refetchStores, refetchFinancials, refetchEditHistory]);
 
   useEffect(() => {
     // Initial bootstrap fetch on mount — intentionally run once.
@@ -106,6 +121,47 @@ export function DataProvider({ children }) {
       await refetchFinancials();
     },
     [refetchFinancials]
+  );
+
+  // Targeted edits (e.g. from the 매장별 손익 page) only touch the accounts
+  // that actually changed, drop them back to pending for re-approval, and
+  // log an audit trail row per change — unlike submitEntries' full replace.
+  const editEntries = useCallback(
+    async ({ storeId, month, editor, changes }) => {
+      if (changes.length === 0) return;
+      const rows = changes.map((c) => ({
+        store_id: storeId,
+        month,
+        account_code: c.accountCode,
+        amount: c.newAmount,
+        qty: c.newQty ?? null,
+        status: "pending",
+        source: "manual",
+        writer: editor,
+        approved_by: null,
+        approved_at: null,
+      }));
+      const { error: upErr } = await supabase
+        .from("financial_entries")
+        .upsert(rows, { onConflict: "store_id,month,account_code" });
+      if (upErr) throw upErr;
+
+      const historyRows = changes.map((c) => ({
+        store_id: storeId,
+        month,
+        account_code: c.accountCode,
+        previous_amount: c.oldAmount,
+        new_amount: c.newAmount,
+        previous_qty: c.oldQty ?? null,
+        new_qty: c.newQty ?? null,
+        edited_by: editor,
+      }));
+      const { error: histErr } = await supabase.from("financial_entry_edits").insert(historyRows);
+      if (histErr) throw histErr;
+
+      await Promise.all([refetchFinancials(), refetchEditHistory()]);
+    },
+    [refetchFinancials, refetchEditHistory]
   );
 
   const decide = useCallback(
@@ -186,6 +242,7 @@ export function DataProvider({ children }) {
   const value = {
     stores,
     financials,
+    editHistory,
     loading,
     error,
     toast,
@@ -198,7 +255,9 @@ export function DataProvider({ children }) {
     refetchAll,
     refetchStores,
     refetchFinancials,
+    refetchEditHistory,
     submitEntries,
+    editEntries,
     decide,
     addStore,
     editStore,

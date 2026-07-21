@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, Printer } from "lucide-react";
+import { ChevronRight, Printer, Pencil } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
 import { computePL, allMonths, buildRawRows } from "@/lib/pl";
@@ -10,20 +10,40 @@ import { exportCSV } from "@/lib/csv";
 import { useFranchiseData } from "@/lib/data-context";
 import { Card, Badge, Num, DownloadBtn, selectStyle, secondaryBtn } from "@/components/ui";
 import PLBreakdown from "@/components/PLBreakdown";
+import EditStoreEntry from "@/components/EditStoreEntry";
+import EditHistoryList from "@/components/EditHistoryList";
 
 export default function StoresPage() {
-  const { stores, financials, openReport } = useFranchiseData();
+  const { stores, financials, editHistory, editEntries, openReport, flashToast } = useFranchiseData();
   const [brandFilter, setBrandFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const months = useMemo(() => allMonths(financials), [financials]);
   const [month, setMonth] = useState(() => months[months.length - 1]);
   const [selected, setSelected] = useState(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const rows = stores
     .filter((s) => (brandFilter === "ALL" || s.brand_id === brandFilter) && (typeFilter === "ALL" || s.store_type === typeFilter))
     .map((s) => ({ store: s, pl: computePL(s.id, month, financials) }));
 
   const selectedPL = selected ? computePL(selected.id, month, financials) : null;
+  const selectedHistory = selected
+    ? editHistory.filter((h) => h.store_id === selected.id && h.month === month)
+    : [];
+
+  const handleEditSubmit = async ({ storeId, month: m, editor, changes }) => {
+    setEditSubmitting(true);
+    try {
+      await editEntries({ storeId, month: m, editor, changes });
+      setEditOpen(false);
+      flashToast(`${selected?.name} · ${m} 손익이 수정되어 승인대기 상태로 등록되었습니다.`);
+    } catch (e) {
+      flashToast(`수정 실패: ${e.message || e}`, 5000);
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
 
   return (
     <div>
@@ -132,6 +152,9 @@ export default function StoresPage() {
               </div>
             </div>
             <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={() => setEditOpen(true)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
+                <Pencil size={13} /> 수치 수정
+              </button>
               <button onClick={() => openReport(selected, month, selectedPL)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
                 <Printer size={13} /> 가맹점 리포트
               </button>
@@ -141,9 +164,20 @@ export default function StoresPage() {
               />
             </div>
             <PLBreakdown pl={selectedPL} />
+            <EditHistoryList history={selectedHistory} />
           </Card>
         )}
       </div>
+      {editOpen && selected && (
+        <EditStoreEntry
+          store={selected}
+          month={month}
+          financials={financials}
+          onClose={() => setEditOpen(false)}
+          onSubmit={handleEditSubmit}
+          submitting={editSubmitting}
+        />
+      )}
     </div>
   );
 }

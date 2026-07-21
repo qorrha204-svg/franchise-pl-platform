@@ -3,12 +3,21 @@
 :root {
   --background: #f5f6f3;
   --foreground: #1b231f;
+  /* Every part of the app (headings, body copy, tabular numbers) renders in
+     a single typeface — mixing Google fonts with missing Hangul glyphs was
+     causing inconsistent fallback rendering ("뭉개짐"). */
+  --font-display: var(--font-pretendard), "Malgun Gothic", sans-serif;
+  --font-sans-kr: var(--font-pretendard), "Malgun Gothic", sans-serif;
+  --font-mono-kr: var(--font-pretendard), "Malgun Gothic", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans-kr), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {

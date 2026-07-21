@@ -71,6 +71,26 @@ create index if not exists idx_financial_entries_store_month on financial_entrie
 create index if not exists idx_financial_entries_status on financial_entries(status);
 create index if not exists idx_financial_entries_month on financial_entries(month);
 
+-- ============================== financial_entry_edits (수정 이력) ==============================
+-- Audit trail for direct edits made from the 매장별 손익 page. submitEntries()
+-- (the entry wizard) does a full delete+reinsert per store/month and doesn't
+-- log here; editEntries() only ever touches the specific accounts a user
+-- changed, so this table records a clean before/after per edit.
+create table if not exists financial_entry_edits (
+  id uuid primary key default gen_random_uuid(),
+  store_id uuid not null references stores(id) on delete cascade,
+  month text not null check (month ~ '^\d{4}-\d{2}$'),
+  account_code text not null references accounts(code),
+  previous_amount numeric,
+  new_amount numeric not null,
+  previous_qty integer,
+  new_qty integer,
+  edited_by text not null,
+  edited_at timestamptz not null default now()
+);
+
+create index if not exists idx_financial_entry_edits_store_month on financial_entry_edits(store_id, month);
+
 -- ============================== Row Level Security ==============================
 -- No auth yet: anyone with the anon key (i.e. anyone with the app URL) can
 -- read and write everything. This is intentional per spec section 6 — role
@@ -79,6 +99,7 @@ alter table brands enable row level security;
 alter table stores enable row level security;
 alter table accounts enable row level security;
 alter table financial_entries enable row level security;
+alter table financial_entry_edits enable row level security;
 
 drop policy if exists "public read brands" on brands;
 create policy "public read brands" on brands for select using (true);
@@ -91,3 +112,6 @@ create policy "public all stores" on stores for all using (true) with check (tru
 
 drop policy if exists "public all financial_entries" on financial_entries;
 create policy "public all financial_entries" on financial_entries for all using (true) with check (true);
+
+drop policy if exists "public all financial_entry_edits" on financial_entry_edits;
+create policy "public all financial_entry_edits" on financial_entry_edits for all using (true) with check (true);
