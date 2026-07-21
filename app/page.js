@@ -19,24 +19,51 @@ import { won, pct } from "@/lib/format";
 import { computePL, categoryTotals, allMonths, buildRawRows } from "@/lib/pl";
 import { BRANDS, STORE_TYPES, brandName } from "@/lib/constants";
 import { storeById } from "@/lib/stores";
-import { currentMonth } from "@/lib/date";
+import { currentMonth, formatMonthShort } from "@/lib/date";
 import { exportCSV } from "@/lib/csv";
 import { useFranchiseData } from "@/lib/data-context";
-import { Card, Num, Badge, DownloadBtn, secondaryBtn, kpiLabel, cardTitle } from "@/components/ui";
+import { Card, Num, Badge, DownloadBtn, selectStyle, secondaryBtn, kpiLabel, cardTitle } from "@/components/ui";
 import MultiSelect from "@/components/MultiSelect";
 import PLBreakdown from "@/components/PLBreakdown";
 
 const numFmt = (v) => Math.round(v).toLocaleString("ko-KR");
 
+function PeriodRangeSelect({ months, start, end, onChangeStart, onChangeEnd }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <select value={start} onChange={(e) => onChangeStart(e.target.value)} style={selectStyle}>
+        {months.map((m) => (
+          <option key={m} value={m}>
+            {formatMonthShort(m)}
+          </option>
+        ))}
+      </select>
+      <span style={{ color: COLORS.inkSoft, fontSize: 13 }}>~</span>
+      <select value={end} onChange={(e) => onChangeEnd(e.target.value)} style={selectStyle}>
+        {months.map((m) => (
+          <option key={m} value={m}>
+            {formatMonthShort(m)}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function DashHeader({
   stores,
+  months,
+  periodLo,
+  periodHi,
+  setPeriodStart,
+  setPeriodEnd,
+  periodLabel,
   selectedBrandIds,
   setSelectedBrandIds,
   selectedTypes,
   setSelectedTypes,
   selectedStoreIds,
   setSelectedStoreIds,
-  refMonth,
   onExport,
 }) {
   const brandOptions = BRANDS.map((b) => ({ value: b.id, label: b.name }));
@@ -49,7 +76,7 @@ function DashHeader({
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: COLORS.ink, margin: 0 }}>
           경영 대시보드
         </h1>
-        <p style={{ color: COLORS.inkSoft, fontSize: 13, marginTop: 4 }}>기준월 {refMonth} · 승인 완료 데이터 기준</p>
+        <p style={{ color: COLORS.inkSoft, fontSize: 13, marginTop: 4 }}>{periodLabel} · 승인 완료 데이터 기준</p>
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         <MultiSelect label="브랜드" options={brandOptions} selected={selectedBrandIds} onChange={setSelectedBrandIds} />
@@ -62,6 +89,7 @@ function DashHeader({
           searchable
           width={180}
         />
+        <PeriodRangeSelect months={months} start={periodLo} end={periodHi} onChangeStart={setPeriodStart} onChangeEnd={setPeriodEnd} />
         <DownloadBtn label="전체 Raw 데이터" onClick={onExport} />
       </div>
     </div>
@@ -73,12 +101,25 @@ export default function DashboardPage() {
   const [selectedBrandIds, setSelectedBrandIds] = useState([]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedStoreIds, setSelectedStoreIds] = useState([]);
+  const [periodStart, setPeriodStart] = useState(null);
+  const [periodEnd, setPeriodEnd] = useState(null);
 
   const months = useMemo(() => allMonths(financials), [financials]);
   const latestConfirmedMonth = useMemo(() => {
     const c = financials.filter((f) => f.status === "confirmed").map((f) => f.month);
     return c.length ? c.sort().slice(-1)[0] : currentMonth();
   }, [financials]);
+
+  const effectiveStart = periodStart ?? latestConfirmedMonth;
+  const effectiveEnd = periodEnd ?? latestConfirmedMonth;
+  const periodLo = effectiveStart <= effectiveEnd ? effectiveStart : effectiveEnd;
+  const periodHi = effectiveStart <= effectiveEnd ? effectiveEnd : effectiveStart;
+  const periodMonths = useMemo(
+    () => months.filter((m) => m >= periodLo && m <= periodHi),
+    [months, periodLo, periodHi]
+  );
+  const periodRangeText = periodLo === periodHi ? periodLo : `${periodLo}~${periodHi}`;
+  const periodLabel = periodLo === periodHi ? `기준월 ${periodLo}` : `기간 ${periodLo}~${periodHi}`;
 
   const filteredStores = useMemo(
     () =>
@@ -97,6 +138,12 @@ export default function DashboardPage() {
 
   const filterProps = {
     stores,
+    months,
+    periodLo,
+    periodHi,
+    setPeriodStart,
+    setPeriodEnd,
+    periodLabel,
     selectedBrandIds,
     setSelectedBrandIds,
     selectedTypes,
@@ -111,7 +158,7 @@ export default function DashboardPage() {
       let profit = 0;
       const pendingBatches = new Set();
       filteredStores.forEach((s) => {
-        const pl = computePL(s.id, latestConfirmedMonth, financials, ["confirmed"]);
+        const pl = computePL(s.id, periodMonths, financials, ["confirmed"]);
         revenue += pl.revenue;
         profit += pl.profit;
       });
@@ -129,14 +176,14 @@ export default function DashboardPage() {
       filteredStores
         .filter((s) => s.brand_id === b.id)
         .forEach((s) => {
-          const pl = computePL(s.id, latestConfirmedMonth, financials, ["confirmed"]);
+          const pl = computePL(s.id, periodMonths, financials, ["confirmed"]);
           revenue += pl.revenue;
           profit += pl.profit;
         });
       return { name: b.name, 매출: Math.round(revenue / 1000), 영업이익: Math.round(profit / 1000) };
     });
 
-    const trendChart = months.map((m) => {
+    const trendChart = periodMonths.map((m) => {
       let profit = 0;
       filteredStores.forEach((s) => {
         profit += computePL(s.id, m, financials, ["confirmed"]).profit;
@@ -145,14 +192,14 @@ export default function DashboardPage() {
     });
 
     const worstStores = filteredStores
-      .map((s) => ({ store: s, pl: computePL(s.id, latestConfirmedMonth, financials, ["confirmed"]) }))
+      .map((s) => ({ store: s, pl: computePL(s.id, periodMonths, financials, ["confirmed"]) }))
       .filter((x) => x.pl.revenue > 0)
       .sort((a, b) => a.pl.margin - b.pl.margin)
       .slice(0, 5);
 
     return (
       <div>
-        <DashHeader {...filterProps} refMonth={latestConfirmedMonth} onExport={handleExportAll} />
+        <DashHeader {...filterProps} onExport={handleExportAll} />
         <div className="grid-kpi-4" style={{ marginBottom: 20 }}>
           <Card>
             <div style={kpiLabel}>전체 매출</div>
@@ -214,7 +261,7 @@ export default function DashboardPage() {
             <AlertTriangle size={16} color={COLORS.warn} /> 이익률 하위 매장 (주의 관찰)
           </div>
           <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 14 }}>
-            {latestConfirmedMonth} 기준 영업이익률이 낮은 매장입니다.
+            {periodRangeText} 기준 영업이익률이 낮은 매장입니다.
           </p>
           <div className="table-scroll">
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -255,7 +302,7 @@ export default function DashboardPage() {
               {worstStores.length === 0 && (
                 <tr>
                   <td colSpan={5} style={{ padding: "16px 4px", textAlign: "center", fontSize: 12.5, color: COLORS.inkSoft }}>
-                    {latestConfirmedMonth} 기준 승인 완료된 데이터가 없습니다.
+                    {periodRangeText} 기준 승인 완료된 데이터가 없습니다.
                   </td>
                 </tr>
               )}
@@ -268,24 +315,24 @@ export default function DashboardPage() {
   }
 
   const store = singleStore;
-  const pl = computePL(store.id, latestConfirmedMonth, financials, ["confirmed"]);
+  const pl = computePL(store.id, periodMonths, financials, ["confirmed"]);
   const catTotals = categoryTotals(pl.byCode);
   const catChart = [
     { name: "매출원가", 금액: Math.round(catTotals["매출원가"] / 10000) },
     { name: "고정비", 금액: Math.round(catTotals["고정비"] / 10000) },
     { name: "변동비", 금액: Math.round(catTotals["변동비"] / 10000) },
   ];
-  const trendChart = months.map((m) => ({
+  const trendChart = periodMonths.map((m) => ({
     month: m,
     영업이익: Math.round(computePL(store.id, m, financials, ["confirmed"]).profit / 1000),
   }));
 
   return (
     <div>
-      <DashHeader {...filterProps} refMonth={latestConfirmedMonth} onExport={handleExportAll} />
+      <DashHeader {...filterProps} onExport={handleExportAll} />
       <div className="grid-kpi-3" style={{ marginBottom: 20 }}>
         <Card>
-          <div style={kpiLabel}>매출 ({latestConfirmedMonth})</div>
+          <div style={kpiLabel}>매출 ({periodRangeText})</div>
           <div style={{ fontSize: 22 }}>
             <Num value={won(pl.revenue)} />
           </div>
@@ -334,7 +381,7 @@ export default function DashboardPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
             <div style={cardTitle}>{store?.name} 손익 상세</div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => openReport(store, latestConfirmedMonth, pl)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
+              <button onClick={() => openReport(store, periodRangeText, pl)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
                 <Printer size={13} /> 가맹점 리포트
               </button>
               <DownloadBtn
