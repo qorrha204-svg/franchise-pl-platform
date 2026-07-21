@@ -4,6 +4,8 @@
 웹앱입니다. `franchise-pl-platform-spec.md` 스펙과 `FranchisePLPlatform.jsx` 프로토타입을
 Next.js + Supabase로 옮긴 정식 버전입니다.
 
+배포: GitHub main 브랜치에 push하면 Vercel이 자동으로 재배포합니다.
+
 - 프런트: Next.js 16 (App Router) + Tailwind, 원본 프로토타입과 동일한 디자인 토큰
 - 백엔드: Supabase (Postgres + RLS). **인증은 아직 없습니다** — 이 앱 URL과 Supabase anon
   key를 아는 사람은 누구나 전체 데이터를 읽고 쓸 수 있습니다 (스펙 6번 항목, 의도된 설계).
