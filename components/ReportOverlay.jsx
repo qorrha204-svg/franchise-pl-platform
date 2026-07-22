@@ -1,14 +1,19 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { Printer, X } from "lucide-react";
 import { COLORS, PRINT_CSS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
 import { groupSums } from "@/lib/pl";
 import { brandName } from "@/lib/constants";
+import { computeBenchmarkRatios } from "@/lib/benchmarks";
+import { useFranchiseData } from "@/lib/data-context";
 import { primaryBtn, secondaryBtn } from "@/components/ui";
+import SolutionSuggestions from "@/components/SolutionSuggestions";
 
 export default function ReportOverlay({ store, month, pl, onClose }) {
+  const { financials } = useFranchiseData();
+  const { avgRatios, sampleCount } = useMemo(() => computeBenchmarkRatios(financials), [financials]);
   const groups = groupSums(pl.byCode);
   return (
     <div
@@ -121,6 +126,7 @@ export default function ReportOverlay({ store, month, pl, onClose }) {
               </tr>
             </tbody>
           </table>
+          <SolutionSuggestions pl={pl} avgRatios={avgRatios} sampleCount={sampleCount} />
           <div style={{ marginTop: 30, fontSize: 11, color: COLORS.inkSoft, borderTop: `1px solid ${COLORS.line}`, paddingTop: 12 }}>
             본 리포트는 본사 승인 완료 데이터를 기준으로 자동 생성되었습니다. · 생성일 {new Date().toLocaleDateString("ko-KR")}
           </div>
