@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, Printer, Pencil, Search } from "lucide-react";
+import { ChevronRight, Printer, Pencil, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
 import { computePL, allMonths, buildRawRows } from "@/lib/pl";
@@ -26,6 +26,35 @@ export default function StoresPage() {
   const [selected, setSelected] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState("asc");
+
+  const toggleSort = (key) => {
+    if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortValue = (key, store, pl) => {
+    switch (key) {
+      case "name":
+        return store.name;
+      case "store_type":
+        return store.store_type;
+      case "revenue":
+        return pl.revenue;
+      case "profit":
+        return pl.profit;
+      case "margin":
+        return pl.margin;
+      case "status":
+        return pl.revenue === 0 ? 0 : pl.hasPending ? 1 : 2;
+      default:
+        return 0;
+    }
+  };
 
   const q = query.trim();
   const rows = stores
@@ -36,6 +65,16 @@ export default function StoresPage() {
         (!q || s.name.includes(q) || s.code.includes(q))
     )
     .map((s) => ({ store: s, pl: computePL(s.id, month, financials) }));
+
+  if (sortKey) {
+    const dir = sortDir === "asc" ? 1 : -1;
+    rows.sort((a, b) => {
+      const av = sortValue(sortKey, a.store, a.pl);
+      const bv = sortValue(sortKey, b.store, b.pl);
+      if (typeof av === "string") return av.localeCompare(bv, "ko") * dir;
+      return (av - bv) * dir;
+    });
+  }
 
   const selectedPL = selected ? computePL(selected.id, month, financials) : null;
   const selectedHistory = selected
@@ -100,21 +139,40 @@ export default function StoresPage() {
           <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: COLORS.bg, borderBottom: `1px solid ${COLORS.line}`, position: "sticky", top: 0 }}>
-                {["매장", "타입", "매출", "영업이익", "이익률", "상태", ""].map((h, i) => (
-                  <th
-                    key={h}
-                    style={{
-                      textAlign: i >= 2 && i <= 4 ? "right" : "left",
-                      fontSize: 11,
-                      color: COLORS.inkSoft,
-                      fontWeight: 500,
-                      padding: "10px 12px",
-                      background: COLORS.bg,
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
+                {[
+                  { key: "name", label: "매장" },
+                  { key: "store_type", label: "타입" },
+                  { key: "revenue", label: "매출" },
+                  { key: "profit", label: "영업이익" },
+                  { key: "margin", label: "이익률" },
+                  { key: "status", label: "상태" },
+                  { key: null, label: "" },
+                ].map(({ key, label }, i) => {
+                  const active = sortKey === key;
+                  const SortIcon = !key ? null : active ? (sortDir === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+                  return (
+                    <th
+                      key={label || "chevron"}
+                      onClick={key ? () => toggleSort(key) : undefined}
+                      style={{
+                        textAlign: i >= 2 && i <= 4 ? "right" : "left",
+                        fontSize: 11,
+                        color: active ? COLORS.accent : COLORS.inkSoft,
+                        fontWeight: active ? 700 : 500,
+                        padding: "10px 12px",
+                        background: COLORS.bg,
+                        cursor: key ? "pointer" : "default",
+                        userSelect: "none",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, flexDirection: i >= 2 && i <= 4 ? "row-reverse" : "row" }}>
+                        {label}
+                        {SortIcon && <SortIcon size={11} />}
+                      </span>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>

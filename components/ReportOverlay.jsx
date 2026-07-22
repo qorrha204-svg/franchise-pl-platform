@@ -17,6 +17,7 @@ export default function ReportOverlay({ store, month, pl, onClose }) {
   const groups = groupSums(pl.byCode);
   return (
     <div
+      className="report-overlay-backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -30,7 +31,7 @@ export default function ReportOverlay({ store, month, pl, onClose }) {
       }}
     >
       <style>{PRINT_CSS}</style>
-      <div style={{ background: "#fff", width: "min(720px, 94vw)", borderRadius: 10, overflow: "hidden" }}>
+      <div className="report-overlay-card" style={{ background: "#fff", width: "min(720px, 94vw)", borderRadius: 10, overflow: "hidden" }}>
         <div
           className="no-print"
           style={{
