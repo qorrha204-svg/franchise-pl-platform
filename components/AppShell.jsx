@@ -28,7 +28,7 @@ const NAV = [
   { href: "/stores", label: "매장별 손익", icon: Store },
   { href: "/manage", label: "매장 관리", icon: Building2 },
   { href: "/approval", label: "승인관리", icon: CheckSquare, badgeKey: "pending" },
-  { href: "/calculator", label: "예정 계산기", icon: Calculator },
+  { href: "/calculator", label: "예상손익 시뮬레이터", icon: Calculator },
 ];
 
 export default function AppShell({ children }) {

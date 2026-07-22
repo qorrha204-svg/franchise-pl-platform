@@ -46,7 +46,7 @@ export default function CalculatorPage() {
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
         <Calculator size={22} color={COLORS.accent} />
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: COLORS.ink, margin: 0 }}>
-          예정 계산기
+          예상손익 시뮬레이터
         </h1>
       </div>
       <p style={{ color: COLORS.inkSoft, fontSize: 13, marginBottom: 20 }}>
