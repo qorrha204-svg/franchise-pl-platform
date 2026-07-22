@@ -96,6 +96,34 @@ function DashHeader({
   );
 }
 
+function BrandChartTooltip({ active, payload, label }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: `1px solid ${COLORS.line}`,
+        borderRadius: 8,
+        padding: "10px 12px",
+        fontFamily: "Pretendard",
+        fontSize: 12,
+        boxShadow: "0 4px 12px rgba(27,35,31,0.1)",
+      }}
+    >
+      <div style={{ fontWeight: 700, color: COLORS.ink, marginBottom: 6 }}>{label}</div>
+      {payload.map((item) => (
+        <div key={item.dataKey} style={{ display: "flex", alignItems: "center", gap: 6, color: COLORS.ink, padding: "2px 0" }}>
+          <span style={{ width: 9, height: 9, borderRadius: 2, background: item.color, border: `1px solid ${COLORS.line}`, flexShrink: 0 }} />
+          <span>
+            {item.name} : {numFmt(item.value)}
+            {item.dataKey === "영업이익" ? ` (${pct(item.payload.비율)})` : ""}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { stores, financials, openReport } = useFranchiseData();
   const [selectedBrandIds, setSelectedBrandIds] = useState([]);
@@ -198,6 +226,7 @@ export default function DashboardPage() {
         name: b.name,
         매출: Math.round((cnt ? revenueSum / cnt : 0) / 1000),
         영업이익: Math.round((cnt ? profitSum / cnt : 0) / 1000),
+        비율: revenueSum ? profitSum / revenueSum : 0,
       };
     });
 
@@ -259,7 +288,7 @@ export default function DashboardPage() {
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "Pretendard" }} />
                 <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
-                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} formatter={(value) => numFmt(value)} />
+                <Tooltip content={<BrandChartTooltip />} />
                 <Legend
                   wrapperStyle={{ fontSize: 12, fontFamily: "Pretendard" }}
                   formatter={(value) => <span style={{ color: COLORS.ink }}>{value}</span>}
