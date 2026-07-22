@@ -16,39 +16,18 @@ import {
 } from "recharts";
 import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
-import { computePL, categoryTotals, allMonths, buildRawRows } from "@/lib/pl";
+import { computePL, categoryTotals, allMonths, buildRawRows, averagePL } from "@/lib/pl";
 import { BRANDS, STORE_TYPES, brandName } from "@/lib/constants";
 import { storeById } from "@/lib/stores";
-import { currentMonth, formatMonthShort } from "@/lib/date";
+import { currentMonth } from "@/lib/date";
 import { exportCSV } from "@/lib/csv";
 import { useFranchiseData } from "@/lib/data-context";
-import { Card, Num, Badge, DownloadBtn, selectStyle, secondaryBtn, kpiLabel, cardTitle } from "@/components/ui";
+import { Card, Num, Badge, DownloadBtn, secondaryBtn, kpiLabel, cardTitle } from "@/components/ui";
 import MultiSelect from "@/components/MultiSelect";
+import PeriodRangeSelect from "@/components/PeriodRangeSelect";
 import PLBreakdown from "@/components/PLBreakdown";
 
 const numFmt = (v) => Math.round(v).toLocaleString("ko-KR");
-
-function PeriodRangeSelect({ months, start, end, onChangeStart, onChangeEnd }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <select value={start} onChange={(e) => onChangeStart(e.target.value)} style={selectStyle}>
-        {months.map((m) => (
-          <option key={m} value={m}>
-            {formatMonthShort(m)}
-          </option>
-        ))}
-      </select>
-      <span style={{ color: COLORS.inkSoft, fontSize: 13 }}>~</span>
-      <select value={end} onChange={(e) => onChangeEnd(e.target.value)} style={selectStyle}>
-        {months.map((m) => (
-          <option key={m} value={m}>
-            {formatMonthShort(m)}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
 
 function DashHeader({
   stores,
@@ -370,7 +349,8 @@ export default function DashboardPage() {
   }
 
   const store = singleStore;
-  const pl = computePL(store.id, periodMonths, financials, ["confirmed"]);
+  const pl = averagePL(computePL(store.id, periodMonths, financials, ["confirmed"]), periodMonths.length);
+  const isAvg = periodMonths.length > 1;
   const catTotals = categoryTotals(pl.byCode);
   const catChart = ["매출원가", "고정비", "변동비"].map((name) => {
     const amount = catTotals[name] || 0;
@@ -390,13 +370,13 @@ export default function DashboardPage() {
       <DashHeader {...filterProps} onExport={handleExportAll} />
       <div className="grid-kpi-3" style={{ marginBottom: 20 }}>
         <Card>
-          <div style={kpiLabel}>매출 ({periodRangeText})</div>
+          <div style={kpiLabel}>{isAvg ? "평균 매출" : "매출"} ({periodRangeText})</div>
           <div style={{ fontSize: 22 }}>
             <Num value={won(pl.revenue)} />
           </div>
         </Card>
         <Card>
-          <div style={kpiLabel}>영업이익</div>
+          <div style={kpiLabel}>{isAvg ? "평균 영업이익" : "영업이익"}</div>
           <div style={{ fontSize: 22 }}>
             <Num value={won(pl.profit)} tone={pl.profit >= 0 ? "good" : "bad"} />
           </div>
@@ -440,7 +420,7 @@ export default function DashboardPage() {
         </div>
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6, flexWrap: "wrap", gap: 8 }}>
-            <div style={cardTitle}>{store?.name} 손익 상세</div>
+            <div style={cardTitle}>{store?.name} 손익 상세{isAvg ? " (월평균)" : ""}</div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => openReport(store, periodRangeText, pl)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
                 <Printer size={13} /> 가족점 리포트

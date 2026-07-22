@@ -4,12 +4,14 @@ import { useMemo, useState } from "react";
 import { ChevronRight, Printer, Pencil, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
-import { computePL, allMonths, buildRawRows } from "@/lib/pl";
+import { computePL, allMonths, buildRawRows, averagePL } from "@/lib/pl";
 import { BRANDS, brandName } from "@/lib/constants";
+import { currentMonth } from "@/lib/date";
 import { computeBenchmarkRatios } from "@/lib/benchmarks";
 import { exportCSV } from "@/lib/csv";
 import { useFranchiseData } from "@/lib/data-context";
 import { Card, Badge, Num, DownloadBtn, selectStyle, secondaryBtn } from "@/components/ui";
+import PeriodRangeSelect from "@/components/PeriodRangeSelect";
 import PLBreakdown from "@/components/PLBreakdown";
 import EditStoreEntry from "@/components/EditStoreEntry";
 import EditHistoryList from "@/components/EditHistoryList";
@@ -22,7 +24,22 @@ export default function StoresPage() {
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [query, setQuery] = useState("");
   const months = useMemo(() => allMonths(financials), [financials]);
-  const [month, setMonth] = useState(() => months[months.length - 1]);
+  const latestConfirmedMonth = useMemo(() => {
+    const c = financials.filter((f) => f.status === "confirmed").map((f) => f.month);
+    return c.length ? c.sort().slice(-1)[0] : currentMonth();
+  }, [financials]);
+  const [periodStart, setPeriodStart] = useState(null);
+  const [periodEnd, setPeriodEnd] = useState(null);
+  const effectiveStart = periodStart ?? latestConfirmedMonth;
+  const effectiveEnd = periodEnd ?? latestConfirmedMonth;
+  const periodLo = effectiveStart <= effectiveEnd ? effectiveStart : effectiveEnd;
+  const periodHi = effectiveStart <= effectiveEnd ? effectiveEnd : effectiveStart;
+  const periodMonths = useMemo(
+    () => months.filter((m) => m >= periodLo && m <= periodHi),
+    [months, periodLo, periodHi]
+  );
+  const periodRangeText = periodLo === periodHi ? periodLo : `${periodLo}~${periodHi}`;
+  const isAvg = periodMonths.length > 1;
   const [selected, setSelected] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -64,7 +81,7 @@ export default function StoresPage() {
         (typeFilter === "ALL" || s.store_type === typeFilter) &&
         (!q || s.name.includes(q) || s.code.includes(q))
     )
-    .map((s) => ({ store: s, pl: computePL(s.id, month, financials) }));
+    .map((s) => ({ store: s, pl: computePL(s.id, periodMonths, financials) }));
 
   if (sortKey) {
     const dir = sortDir === "asc" ? 1 : -1;
@@ -76,9 +93,11 @@ export default function StoresPage() {
     });
   }
 
-  const selectedPL = selected ? computePL(selected.id, month, financials) : null;
+  const selectedPL = selected
+    ? averagePL(computePL(selected.id, periodMonths, financials), periodMonths.length)
+    : null;
   const selectedHistory = selected
-    ? editHistory.filter((h) => h.store_id === selected.id && h.month === month)
+    ? editHistory.filter((h) => h.store_id === selected.id && periodMonths.includes(h.month))
     : [];
 
   const handleEditSubmit = async ({ storeId, month: m, editor, changes }) => {
@@ -126,13 +145,7 @@ export default function StoresPage() {
           <option value="배달점">배달점</option>
           <option value="일반">일반</option>
         </select>
-        <select value={month} onChange={(e) => setMonth(e.target.value)} style={selectStyle}>
-          {months.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+        <PeriodRangeSelect months={months} start={periodLo} end={periodHi} onChangeStart={setPeriodStart} onChangeEnd={setPeriodEnd} />
       </div>
       <div className={selected ? "grid-split-double" : ""} style={selected ? undefined : { display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
         <Card style={{ padding: 0, maxHeight: 640, overflowY: "auto", overflowX: "auto" }}>
@@ -225,14 +238,15 @@ export default function StoresPage() {
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: COLORS.ink }}>{selected.name}</div>
               <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 16 }}>
-                {brandName(selected.brand_id)} · {selected.complex_type} · {selected.store_type} · {month}
+                {brandName(selected.brand_id)} · {selected.complex_type} · {selected.store_type} · {periodRangeText}
+                {isAvg ? " (월평균)" : ""}
               </div>
             </div>
             <div style={{ marginBottom: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button onClick={() => setEditOpen(true)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
-                <Pencil size={13} /> 수치 수정
+                <Pencil size={13} /> {periodHi} 수치 수정
               </button>
-              <button onClick={() => openReport(selected, month, selectedPL)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
+              <button onClick={() => openReport(selected, periodRangeText, selectedPL)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
                 <Printer size={13} /> 가족점 리포트
               </button>
               <DownloadBtn
@@ -249,7 +263,7 @@ export default function StoresPage() {
       {editOpen && selected && (
         <EditStoreEntry
           store={selected}
-          month={month}
+          month={periodHi}
           financials={financials}
           onClose={() => setEditOpen(false)}
           onSubmit={handleEditSubmit}
