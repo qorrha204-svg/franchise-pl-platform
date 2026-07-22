@@ -343,11 +343,14 @@ export default function DashboardPage() {
   const store = singleStore;
   const pl = computePL(store.id, periodMonths, financials, ["confirmed"]);
   const catTotals = categoryTotals(pl.byCode);
-  const catChart = [
-    { name: "매출원가", 금액: Math.round(catTotals["매출원가"] / 10000) },
-    { name: "고정비", 금액: Math.round(catTotals["고정비"] / 10000) },
-    { name: "변동비", 금액: Math.round(catTotals["변동비"] / 10000) },
-  ];
+  const catChart = ["매출원가", "고정비", "변동비"].map((name) => {
+    const amount = catTotals[name] || 0;
+    return {
+      name,
+      금액: Math.round(amount / 1000),
+      비율: pl.revenue ? amount / pl.revenue : 0,
+    };
+  });
   const trendChart = periodMonths.map((m) => ({
     month: m,
     영업이익: Math.round(computePL(store.id, m, financials, ["confirmed"]).profit / 1000),
@@ -379,13 +382,16 @@ export default function DashboardPage() {
       <div className="grid-2col-rev">
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <Card>
-            <div style={cardTitle}>비용 구조 (만원)</div>
+            <div style={cardTitle}>비용 구조 (천원)</div>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={catChart}>
                 <CartesianGrid stroke={COLORS.line} vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 12, fontFamily: "Pretendard" }} />
-                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} />
-                <Tooltip contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }} />
+                <YAxis tick={{ fontSize: 11, fontFamily: "Pretendard" }} tickFormatter={numFmt} />
+                <Tooltip
+                  contentStyle={{ fontFamily: "Pretendard", fontSize: 12, borderRadius: 8 }}
+                  formatter={(value, name, entry) => [`${numFmt(value)}천원 (${pct(entry.payload.비율)})`, "금액"]}
+                />
                 <Bar dataKey="금액" fill={COLORS.accent} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
