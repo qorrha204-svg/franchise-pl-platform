@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, Printer, Pencil } from "lucide-react";
+import { ChevronRight, Printer, Pencil, Search } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
 import { computePL, allMonths, buildRawRows } from "@/lib/pl";
@@ -20,14 +20,21 @@ export default function StoresPage() {
   const { avgRatios, sampleCount } = useMemo(() => computeBenchmarkRatios(financials), [financials]);
   const [brandFilter, setBrandFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
+  const [query, setQuery] = useState("");
   const months = useMemo(() => allMonths(financials), [financials]);
   const [month, setMonth] = useState(() => months[months.length - 1]);
   const [selected, setSelected] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editSubmitting, setEditSubmitting] = useState(false);
 
+  const q = query.trim();
   const rows = stores
-    .filter((s) => (brandFilter === "ALL" || s.brand_id === brandFilter) && (typeFilter === "ALL" || s.store_type === typeFilter))
+    .filter(
+      (s) =>
+        (brandFilter === "ALL" || s.brand_id === brandFilter) &&
+        (typeFilter === "ALL" || s.store_type === typeFilter) &&
+        (!q || s.name.includes(q) || s.code.includes(q))
+    )
     .map((s) => ({ store: s, pl: computePL(s.id, month, financials) }));
 
   const selectedPL = selected ? computePL(selected.id, month, financials) : null;
@@ -57,6 +64,15 @@ export default function StoresPage() {
         매장을 선택하면 계정 그룹별 상세 내역을 확인할 수 있습니다. ({rows.length}개 매장)
       </p>
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <div style={{ position: "relative" }}>
+          <Search size={14} style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: COLORS.inkSoft }} />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="매장명 또는 코드 검색"
+            style={{ ...selectStyle, paddingLeft: 30, width: 200 }}
+          />
+        </div>
         <select value={brandFilter} onChange={(e) => setBrandFilter(e.target.value)} style={selectStyle}>
           <option value="ALL">전체 브랜드</option>
           {BRANDS.map((b) => (
