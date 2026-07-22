@@ -9,6 +9,7 @@ import { storeById } from "@/lib/stores";
 import { currentMonth } from "@/lib/date";
 import { primaryBtn, secondaryBtn, labelStyle, inputStyle, Num } from "@/components/ui";
 import { FieldRow, DeliveryFieldRow } from "@/components/fieldInputs";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default function EntryWizard({ stores, onClose, onSubmit, submitting }) {
   const [stepIdx, setStepIdx] = useState(0);
@@ -106,18 +107,13 @@ export default function EntryWizard({ stores, onClose, onSubmit, submitting }) {
               </div>
               <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>매장</label>
-                <select
+                <SearchableSelect
                   value={basic.storeId}
-                  onChange={(e) => setBasic({ ...basic, storeId: e.target.value })}
-                  style={{ ...inputStyle, appearance: "auto" }}
-                >
-                  <option value="">매장을 선택하세요</option>
-                  {stores.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setBasic({ ...basic, storeId: v })}
+                  options={stores.map((s) => ({ value: s.id, label: `${s.name} (${s.code})` }))}
+                  placeholder="매장을 선택하세요"
+                  searchPlaceholder="매장명 또는 코드 검색"
+                />
               </div>
               <div>
                 <label style={labelStyle}>정산월</label>
