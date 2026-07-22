@@ -154,41 +154,64 @@ export default function DashboardPage() {
 
   if (!singleStore) {
     const kpi = (() => {
-      let revenue = 0;
-      let profit = 0;
+      let revenueSum = 0;
+      let profitSum = 0;
+      let storeCount = 0;
       const pendingBatches = new Set();
       filteredStores.forEach((s) => {
         const pl = computePL(s.id, periodMonths, financials, ["confirmed"]);
-        revenue += pl.revenue;
-        profit += pl.profit;
+        if (pl.revenue > 0) {
+          revenueSum += pl.revenue;
+          profitSum += pl.profit;
+          storeCount += 1;
+        }
       });
       const filteredIds = new Set(filteredStores.map((s) => s.id));
       financials.forEach((f) => {
         if (f.status === "pending" && filteredIds.has(f.store_id)) pendingBatches.add(`${f.store_id}_${f.month}`);
       });
-      return { revenue, profit, margin: revenue ? profit / revenue : 0, pending: pendingBatches.size };
+      return {
+        revenue: storeCount ? revenueSum / storeCount : 0,
+        profit: storeCount ? profitSum / storeCount : 0,
+        margin: revenueSum ? profitSum / revenueSum : 0,
+        pending: pendingBatches.size,
+        storeCount,
+      };
     })();
 
     const brandsToShow = selectedBrandIds.length ? BRANDS.filter((b) => selectedBrandIds.includes(b.id)) : BRANDS;
     const brandChart = brandsToShow.map((b) => {
-      let revenue = 0;
-      let profit = 0;
+      let revenueSum = 0;
+      let profitSum = 0;
+      let cnt = 0;
       filteredStores
         .filter((s) => s.brand_id === b.id)
         .forEach((s) => {
           const pl = computePL(s.id, periodMonths, financials, ["confirmed"]);
-          revenue += pl.revenue;
-          profit += pl.profit;
+          if (pl.revenue > 0) {
+            revenueSum += pl.revenue;
+            profitSum += pl.profit;
+            cnt += 1;
+          }
         });
-      return { name: b.name, 매출: Math.round(revenue / 1000), 영업이익: Math.round(profit / 1000) };
+      return {
+        name: b.name,
+        매출: Math.round((cnt ? revenueSum / cnt : 0) / 1000),
+        영업이익: Math.round((cnt ? profitSum / cnt : 0) / 1000),
+      };
     });
 
     const trendChart = periodMonths.map((m) => {
-      let profit = 0;
+      let profitSum = 0;
+      let cnt = 0;
       filteredStores.forEach((s) => {
-        profit += computePL(s.id, m, financials, ["confirmed"]).profit;
+        const p = computePL(s.id, m, financials, ["confirmed"]);
+        if (p.revenue > 0) {
+          profitSum += p.profit;
+          cnt += 1;
+        }
       });
-      return { month: m, 영업이익: Math.round(profit / 1000) };
+      return { month: m, 영업이익: Math.round((cnt ? profitSum / cnt : 0) / 1000) };
     });
 
     const worstStores = filteredStores
@@ -202,13 +225,13 @@ export default function DashboardPage() {
         <DashHeader {...filterProps} onExport={handleExportAll} />
         <div className="grid-kpi-4" style={{ marginBottom: 20 }}>
           <Card>
-            <div style={kpiLabel}>전체 매출</div>
+            <div style={kpiLabel}>평균 매출 ({kpi.storeCount}개 매장)</div>
             <div style={{ fontSize: 22 }}>
               <Num value={won(kpi.revenue)} />
             </div>
           </Card>
           <Card>
-            <div style={kpiLabel}>전체 영업이익</div>
+            <div style={kpiLabel}>평균 영업이익</div>
             <div style={{ fontSize: 22 }}>
               <Num value={won(kpi.profit)} tone={kpi.profit >= 0 ? "good" : "bad"} />
             </div>

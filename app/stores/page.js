@@ -6,15 +6,18 @@ import { COLORS } from "@/lib/tokens";
 import { won, pct } from "@/lib/format";
 import { computePL, allMonths, buildRawRows } from "@/lib/pl";
 import { BRANDS, brandName } from "@/lib/constants";
+import { computeBenchmarkRatios } from "@/lib/benchmarks";
 import { exportCSV } from "@/lib/csv";
 import { useFranchiseData } from "@/lib/data-context";
 import { Card, Badge, Num, DownloadBtn, selectStyle, secondaryBtn } from "@/components/ui";
 import PLBreakdown from "@/components/PLBreakdown";
 import EditStoreEntry from "@/components/EditStoreEntry";
 import EditHistoryList from "@/components/EditHistoryList";
+import SolutionSuggestions from "@/components/SolutionSuggestions";
 
 export default function StoresPage() {
   const { stores, financials, editHistory, editEntries, openReport, flashToast } = useFranchiseData();
+  const { avgRatios, sampleCount } = useMemo(() => computeBenchmarkRatios(financials), [financials]);
   const [brandFilter, setBrandFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
   const months = useMemo(() => allMonths(financials), [financials]);
@@ -164,6 +167,7 @@ export default function StoresPage() {
               />
             </div>
             <PLBreakdown pl={selectedPL} />
+            <SolutionSuggestions pl={selectedPL} avgRatios={avgRatios} sampleCount={sampleCount} />
             <EditHistoryList history={selectedHistory} />
           </Card>
         )}

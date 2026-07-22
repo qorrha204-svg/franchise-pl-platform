@@ -14,6 +14,7 @@ import {
   Loader2,
   Menu,
   X,
+  Calculator,
 } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { useFranchiseData } from "@/lib/data-context";
@@ -27,6 +28,7 @@ const NAV = [
   { href: "/stores", label: "매장별 손익", icon: Store },
   { href: "/manage", label: "매장 관리", icon: Building2 },
   { href: "/approval", label: "승인관리", icon: CheckSquare, badgeKey: "pending" },
+  { href: "/calculator", label: "예정 계산기", icon: Calculator },
 ];
 
 export default function AppShell({ children }) {
