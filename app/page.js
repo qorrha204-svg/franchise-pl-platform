@@ -408,7 +408,7 @@ export default function DashboardPage() {
             <div style={cardTitle}>{store?.name} 손익 상세</div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => openReport(store, periodRangeText, pl)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
-                <Printer size={13} /> 가맹점 리포트
+                <Printer size={13} /> 가족점 리포트
               </button>
               <DownloadBtn
                 label="이 매장 Raw 데이터"

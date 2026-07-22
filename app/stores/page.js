@@ -159,7 +159,7 @@ export default function StoresPage() {
                 <Pencil size={13} /> 수치 수정
               </button>
               <button onClick={() => openReport(selected, month, selectedPL)} style={{ ...secondaryBtn, padding: "8px 12px", fontSize: 12.5 }}>
-                <Printer size={13} /> 가맹점 리포트
+                <Printer size={13} /> 가족점 리포트
               </button>
               <DownloadBtn
                 label="이 매장 Raw 데이터"

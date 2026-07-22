@@ -42,7 +42,7 @@ export default function ReportOverlay({ store, month, pl, onClose }) {
             background: COLORS.bg,
           }}
         >
-          <div style={{ fontSize: 13, color: COLORS.inkSoft }}>가맹점 배포용 리포트 미리보기</div>
+          <div style={{ fontSize: 13, color: COLORS.inkSoft }}>가족점 배포용 리포트 미리보기</div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => window.print()} style={primaryBtn}>
               <Printer size={14} /> PDF로 저장 / 인쇄
