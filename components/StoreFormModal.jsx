@@ -5,6 +5,7 @@ import { X, Check, Plus } from "lucide-react";
 import { COLORS } from "@/lib/tokens";
 import { BRANDS } from "@/lib/constants";
 import { primaryBtn, secondaryBtn, labelStyle, inputStyle } from "@/components/ui";
+import TradeAreaPanel from "@/components/TradeAreaPanel";
 
 export default function StoreFormModal({ initial, onClose, onSave, saving }) {
   const isEdit = !!initial;
@@ -44,7 +45,7 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
             <X size={18} />
           </button>
         </div>
-        <div style={{ padding: "20px 24px" }}>
+        <div style={{ padding: "20px 24px", maxHeight: "60vh", overflowY: "auto" }}>
           <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>매장</label>
             <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="예: 가락" style={inputStyle} />
@@ -82,7 +83,7 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
               <option value="일반">일반</option>
             </select>
           </div>
-          <div>
+          <div style={{ marginBottom: isEdit && initial?.lat ? 14 : 0 }}>
             <label style={labelStyle}>주소</label>
             <input
               value={form.address || ""}
@@ -91,6 +92,9 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
               style={inputStyle}
             />
           </div>
+          {isEdit && initial?.lat && initial?.lng && (
+            <TradeAreaPanel lat={initial.lat} lng={initial.lng} />
+          )}
         </div>
         <div style={{ padding: "14px 24px", borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button onClick={onClose} style={secondaryBtn}>

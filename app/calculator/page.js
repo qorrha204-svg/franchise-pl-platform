@@ -7,8 +7,9 @@ import { won, pct, fmtNum } from "@/lib/format";
 import { computeBenchmarkRatios } from "@/lib/benchmarks";
 import { suggestPlan } from "@/lib/planner";
 import { useFranchiseData } from "@/lib/data-context";
-import { Card, Num, Badge, MoneyInput, primaryBtn, labelStyle } from "@/components/ui";
+import { Card, Num, Badge, MoneyInput, primaryBtn, labelStyle, inputStyle } from "@/components/ui";
 import PLBreakdown from "@/components/PLBreakdown";
+import TradeAreaPanel from "@/components/TradeAreaPanel";
 
 function Field({ label, value, onChange, hint }) {
   return (
@@ -30,7 +31,9 @@ export default function CalculatorPage() {
   const [revenueInput, setRevenueInput] = useState("");
   const [rentInput, setRentInput] = useState("");
   const [profitInput, setProfitInput] = useState("");
+  const [addressInput, setAddressInput] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [submittedAddress, setSubmittedAddress] = useState(null);
 
   const targetRevenue = Number(revenueInput || 0);
   const rentOverride = rentInput ? Number(rentInput) : null;
@@ -70,8 +73,23 @@ export default function CalculatorPage() {
             onChange={setProfitInput}
             hint="입력하면 임차료를 제외한 나머지 비용 항목들을 이 목표에 맞춰 비례 조정해서 제안합니다."
           />
+          <div style={{ marginBottom: 16 }}>
+            <label style={labelStyle}>출점 예정지 주소 (선택)</label>
+            <input
+              value={addressInput}
+              onChange={(e) => setAddressInput(e.target.value)}
+              placeholder="예: 서울특별시 송파구 송파대로28길 6"
+              style={inputStyle}
+            />
+            <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 4 }}>
+              입력하면 주변 상권 정보(업종 밀집도 등)를 함께 보여드립니다.
+            </div>
+          </div>
           <button
-            onClick={() => setSubmitted(true)}
+            onClick={() => {
+              setSubmitted(true);
+              setSubmittedAddress(addressInput.trim() || null);
+            }}
             disabled={!canSubmit}
             style={{ ...primaryBtn, opacity: canSubmit ? 1 : 0.4, cursor: canSubmit ? "pointer" : "not-allowed", width: "100%", justifyContent: "center" }}
           >
@@ -128,6 +146,7 @@ export default function CalculatorPage() {
                 </div>
               )}
               <PLBreakdown pl={plan} />
+              {submittedAddress && <TradeAreaPanel address={submittedAddress} />}
             </Card>
           )}
         </div>
