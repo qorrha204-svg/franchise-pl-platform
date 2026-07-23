@@ -11,7 +11,7 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
   const [form, setForm] = useState(
     initial
       ? { ...initial, brandId: initial.brand_id, complexType: initial.complex_type, storeType: initial.store_type }
-      : { name: "", code: "", brandId: "WONSSAM", complexType: "단독점", storeType: "일반" }
+      : { name: "", code: "", brandId: "WONSSAM", complexType: "단독점", storeType: "일반", address: "" }
   );
   const canSubmit = form.name.trim() && form.code.trim();
 
@@ -74,13 +74,22 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
               <option value="복합점">복합점</option>
             </select>
           </div>
-          <div>
+          <div style={{ marginBottom: 14 }}>
             <label style={labelStyle}>타입구분</label>
             <select value={form.storeType} onChange={(e) => setForm({ ...form, storeType: e.target.value })} style={{ ...inputStyle, appearance: "auto" }}>
               <option value="가마솥">가마솥</option>
               <option value="배달점">배달점</option>
               <option value="일반">일반</option>
             </select>
+          </div>
+          <div>
+            <label style={labelStyle}>주소</label>
+            <input
+              value={form.address || ""}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="예: 서울특별시 송파구 송파대로28길 6"
+              style={inputStyle}
+            />
           </div>
         </div>
         <div style={{ padding: "14px 24px", borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
@@ -97,6 +106,7 @@ export default function StoreFormModal({ initial, onClose, onSave, saving }) {
                 brandId: form.brandId,
                 complexType: form.complexType,
                 storeType: form.storeType,
+                address: form.address?.trim() || "",
               })
             }
             disabled={!canSubmit || saving}

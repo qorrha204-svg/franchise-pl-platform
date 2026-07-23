@@ -91,7 +91,7 @@ export default function ManagePage() {
         <table style={{ width: "100%", minWidth: 640, borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: COLORS.bg, borderBottom: `1px solid ${COLORS.line}`, position: "sticky", top: 0 }}>
-              {["매장", "가맹점코드", "브랜드", "복합점", "타입구분", ""].map((h) => (
+              {["매장", "가맹점코드", "브랜드", "복합점", "타입구분", "주소", ""].map((h) => (
                 <th key={h} style={{ textAlign: "left", fontSize: 11, color: COLORS.inkSoft, fontWeight: 500, padding: "10px 12px", background: COLORS.bg }}>
                   {h}
                 </th>
@@ -109,6 +109,20 @@ export default function ManagePage() {
                 </td>
                 <td style={{ padding: "9px 12px" }}>
                   <Badge tone={s.store_type === "배달점" ? "warn" : "neutral"}>{s.store_type}</Badge>
+                </td>
+                <td
+                  style={{
+                    padding: "9px 12px",
+                    fontSize: 12,
+                    color: COLORS.inkSoft,
+                    maxWidth: 260,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={s.address || ""}
+                >
+                  {s.address || <span style={{ color: COLORS.line }}>-</span>}
                 </td>
                 <td style={{ padding: "9px 12px" }}>
                   {confirmingId === s.id ? (

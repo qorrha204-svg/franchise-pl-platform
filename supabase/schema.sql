@@ -18,6 +18,9 @@ create table if not exists stores (
   brand_id text not null references brands(id),
   complex_type text not null check (complex_type in ('단독점', '복합점')),
   store_type text not null check (store_type in ('가마솥', '배달점', '일반')),
+  address text,
+  lat double precision,
+  lng double precision,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

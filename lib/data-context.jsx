@@ -196,6 +196,7 @@ export function DataProvider({ children }) {
         brand_id: store.brandId,
         complex_type: store.complexType,
         store_type: store.storeType,
+        address: store.address || null,
       });
       if (err) throw err;
       await refetchStores();
@@ -213,6 +214,7 @@ export function DataProvider({ children }) {
           brand_id: store.brandId,
           complex_type: store.complexType,
           store_type: store.storeType,
+          address: store.address || null,
         })
         .eq("id", store.id);
       if (err) throw err;
